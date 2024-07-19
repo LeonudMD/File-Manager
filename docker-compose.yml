@@ -5,36 +5,36 @@ services:
     image: postgres:13
     container_name: FileDB
     environment:
-      POSTGRES_USER: leonud
-      POSTGRES_PASSWORD: pa$$$word
-      POSTGRES_DB: FileDB
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5400:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
   minio:
     image: minio/minio:latest # образ MinIO последней версии.
-    container_name: minio # Имя контейнера.
+    container_name: minio
     restart: unless-stopped # перезапускать, если контейнер был остановлен, кроме случаев, когда Docker демон был перезапущен.
     volumes: # сопоставление локальных директорий с директориями в контейнере.
       - "./minio/data:/data"
       - "./minio/minio:/minio"
       - "./minio/config:/root/.minio"
     environment: # Установка переменных окружения
-      TZ: Europe/Moscow
-      LANG: ru_RU.UTF-8
+      TZ: ${TZ}
+      LANG: ${LANG}
       MINIO_PROMETHEUS_AUTH_TYPE: "public" # тип аутентификации для Prometheus.
-      MINIO_ACCESS_KEY: "root"
-      MINIO_SECRET_KEY: "password"
-    command: server /data --console-address ":9001" # Команда для запуска MinIO с указанием пути к данным и порта для доступа к консоли.
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT}" # Команда для запуска MinIO с указанием пути к данным и порта для доступа к консоли.
     logging:
       driver: "json-file" # Драйвер для логирования.
       options:
         max-size: "100m" # Максимальный размер лог-файла.
     ports: # Проброс портов.
       - "9000:9000" # Порт для загрузки и предварительного просмотра файлов.
-      - "9001:9001" # Порт для доступа к консоли MinIO.
+      - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}" # Порт для доступа к консоли MinIO.
 
 volumes:
   postgres-data:
