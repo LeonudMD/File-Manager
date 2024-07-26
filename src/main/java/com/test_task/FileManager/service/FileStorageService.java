@@ -10,7 +10,5 @@ import java.util.concurrent.TimeUnit;
  */
 public interface FileStorageService {
     FileMetadata addFile(MultipartFile multipartFile, Boolean oneTimeLink, long duration, TimeUnit timeUnit);
-    void deleteFile(String fileName);
-    FileMetadata getFile(String fileName);
-    FileMetadata getFileDetails(String fileName);
+    
 }
