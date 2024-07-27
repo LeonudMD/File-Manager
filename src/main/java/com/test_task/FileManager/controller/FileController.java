@@ -2,6 +2,7 @@ package com.test_task.FileManager.controller;
 
 import com.test_task.FileManager.entity.FileMetadata;
 import com.test_task.FileManager.usecase.AddFileUseCase;
+import com.test_task.FileManager.usecase.DeleteFileUseCase;
 import com.test_task.FileManager.usecase.GetFileUseCase;
 import com.test_task.FileManager.util.EncryptionUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class FileController {
 
     private final AddFileUseCase addFileUseCase;
+    private final DeleteFileUseCase deleteFileUseCase;
     private final GetFileUseCase getFileUseCase;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -84,6 +86,16 @@ public class FileController {
                 .contentLength(source.getFileSize())
                 .header("Content-disposition", "attachment; filename=" + source.getFilename())
                 .body(new InputStreamResource(source.getStream()));
+    }
+
+    @DeleteMapping("/{encryptedFile}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Удалить файл", description = "Удаляет файл с сервера")
+    public ResponseEntity<Void> removeFile(
+            @Parameter(description = "Зашифрованное имя файла для удаления", required = true) @PathVariable String encryptedFile) {
+        String decryptedFile = EncryptionUtil.decrypt(encryptedFile);
+        deleteFileUseCase.execute(decryptedFile);
+        return ResponseEntity.noContent().build();
     }
 }
 

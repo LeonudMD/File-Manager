@@ -122,8 +122,24 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void deleteFile(String fileName) {
+    public void deleteFile(String filename) {
+        try {
+            // Удаляем файл из Minio
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(filename)
+                            .build()
+            );
 
+            // Удаляем метаданные из БД
+            Optional<FileMetadata> metadata = fileMetadataRepository.findByFilename(filename);
+            metadata.ifPresent(fileMetadataRepository::delete);
+        } catch (Exception ex) {
+            log.debug("Ошибка удаления файла: " + ex.getMessage());
+            LOGGER.severe("Failed to delete file: " + ex.getMessage());
+            throw new IllegalStateException("Failed to delete file: " + ex.getMessage(), ex);
+        }
     }
 
     private Date calculateExpirationTime(long duration, TimeUnit timeUnit) {
