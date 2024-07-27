@@ -14,6 +14,11 @@ public class DeleteFileUseCaseImpl implements DeleteFileUseCase {
 
     private final FileStorageService fileStorageService;
 
+    /**
+     * Выполняет операцию удаления файла.
+     *
+     * @param fileName имя файла для удаления.
+     */
     @Override
     public void execute(String fileName) {
         fileStorageService.deleteFile(fileName);

@@ -3,6 +3,7 @@ package com.test_task.FileManager.controller;
 import com.test_task.FileManager.entity.FileMetadata;
 import com.test_task.FileManager.usecase.AddFileUseCase;
 import com.test_task.FileManager.usecase.DeleteFileUseCase;
+import com.test_task.FileManager.usecase.GetFileDetailsUseCase;
 import com.test_task.FileManager.usecase.GetFileUseCase;
 import com.test_task.FileManager.util.EncryptionUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,15 +15,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.TimeUnit;
@@ -40,7 +33,17 @@ public class FileController {
     private final AddFileUseCase addFileUseCase;
     private final DeleteFileUseCase deleteFileUseCase;
     private final GetFileUseCase getFileUseCase;
+    private final GetFileDetailsUseCase getFileDetailsUseCase;
 
+    /**
+     * Загрузка файла на сервер.
+     *
+     * @param file         файл для загрузки.
+     * @param oneTimeLink  флаг одноразовой ссылки.
+     * @param duration     продолжительность жизни ссылки.
+     * @param timeUnit     единица времени для продолжительности.
+     * @return метаданные загруженного файла.
+     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Загрузить файл", description = "Загружает файл на сервер")
@@ -58,6 +61,12 @@ public class FileController {
         }
     }
 
+    /**
+     * Просмотр файла с сервера.
+     *
+     * @param encryptedFile зашифрованное имя файла для просмотра.
+     * @return поток для просмотра файла.
+     */
     @GetMapping("/view/{encryptedFile}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Просмотреть файл", description = "Просматривает файл с сервера")
@@ -73,6 +82,12 @@ public class FileController {
                 .body(new InputStreamResource(source.getStream()));
     }
 
+    /**
+     * Скачивание файла с сервера.
+     *
+     * @param encryptedFile зашифрованное имя файла для скачивания.
+     * @return поток для скачивания файла.
+     */
     @GetMapping("/download/{encryptedFile}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Скачать файл", description = "Скачивает файл с сервера")
@@ -88,6 +103,12 @@ public class FileController {
                 .body(new InputStreamResource(source.getStream()));
     }
 
+    /**
+     * Удаление файла с сервера.
+     *
+     * @param encryptedFile зашифрованное имя файла для удаления.
+     * @return ответ без содержания.
+     */
     @DeleteMapping("/{encryptedFile}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Удалить файл", description = "Удаляет файл с сервера")
@@ -97,5 +118,20 @@ public class FileController {
         deleteFileUseCase.execute(decryptedFile);
         return ResponseEntity.noContent().build();
     }
-}
 
+    /**
+     * Получение деталей файла с сервера.
+     *
+     * @param encryptedFile зашифрованное имя файла для получения деталей.
+     * @return метаданные файла.
+     */
+    @GetMapping("/{encryptedFile}/detail")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Получить детали файла", description = "Получает детали файла с сервера")
+    public ResponseEntity<FileMetadata> getFileDetail(
+            @Parameter(description = "Зашифрованное имя файла для получения деталей", required = true) @PathVariable String encryptedFile) {
+        String decryptedFile = EncryptionUtil.decrypt(encryptedFile);
+        FileMetadata response = getFileDetailsUseCase.execute(decryptedFile);
+        return ResponseEntity.ok(response);
+    }
+}
