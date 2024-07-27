@@ -5,15 +5,20 @@ import com.test_task.FileManager.repository.FileMetadataRepository;
 import com.test_task.FileManager.util.EncryptionUtil;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.GetObjectArgs;
+import io.minio.RemoveObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -85,6 +90,40 @@ public class FileStorageServiceImpl implements FileStorageService {
                 }
             }
         }
+    }
+
+    @Override
+    public FileMetadata getFile(String filename) {
+        try {
+            InputStream inputStream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(filename)
+                            .build()
+            );
+            Optional<FileMetadata> metadata = fileMetadataRepository.findByFilename(filename);
+            if (metadata.isPresent()) {
+                FileMetadata fileMetadata = metadata.get();
+                fileMetadata.setStream(inputStream);
+                // Если ссылка одноразовая, удаляем файл после скачивания
+                if (fileMetadata.getOneTimeLink()) {
+                    deleteFile(fileMetadata.getFilename());
+                }
+                return fileMetadata;
+            } else {
+                log.debug("Метаданные файла не найдены");
+                throw new IllegalStateException("File metadata not found");
+            }
+        } catch (Exception ex) {
+            log.debug("Не удалось получить файл: " + ex.getMessage());
+            LOGGER.severe("Failed to get file: " + ex.getMessage());
+            throw new IllegalStateException("Failed to get file: " + ex.getMessage(), ex);
+        }
+    }
+
+    @Override
+    public void deleteFile(String fileName) {
+
     }
 
     private Date calculateExpirationTime(long duration, TimeUnit timeUnit) {

@@ -2,6 +2,7 @@ package com.test_task.FileManager.controller;
 
 import com.test_task.FileManager.entity.FileMetadata;
 import com.test_task.FileManager.usecase.AddFileUseCase;
+import com.test_task.FileManager.usecase.GetFileUseCase;
 import com.test_task.FileManager.util.EncryptionUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class FileController {
 
     private final AddFileUseCase addFileUseCase;
+    private final GetFileUseCase getFileUseCase;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -52,6 +54,21 @@ public class FileController {
             log.debug("Ошибка при загрузке файла: " + ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ошибка при загрузке файла: " + ex.getMessage());
         }
+    }
+
+    @GetMapping("/view/{encryptedFile}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Просмотреть файл", description = "Просматривает файл с сервера")
+    public ResponseEntity<InputStreamResource> viewFile(
+            @Parameter(description = "Зашифрованное имя файла для просмотра", required = true) @PathVariable String encryptedFile) {
+        String decryptedFile = EncryptionUtil.decrypt(encryptedFile);
+        FileMetadata source = getFileUseCase.execute(decryptedFile);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.parseMediaType(source.getContentType()))
+                .contentLength(source.getFileSize())
+                .header("Content-disposition", "inline; filename=" + source.getFilename())
+                .body(new InputStreamResource(source.getStream()));
     }
 }
 
