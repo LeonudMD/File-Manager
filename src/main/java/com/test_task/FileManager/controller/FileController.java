@@ -70,5 +70,20 @@ public class FileController {
                 .header("Content-disposition", "inline; filename=" + source.getFilename())
                 .body(new InputStreamResource(source.getStream()));
     }
+
+    @GetMapping("/download/{encryptedFile}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Скачать файл", description = "Скачивает файл с сервера")
+    public ResponseEntity<InputStreamResource> downloadFile(
+            @Parameter(description = "Зашифрованное имя файла для скачивания", required = true) @PathVariable String encryptedFile) {
+        String decryptedFile = EncryptionUtil.decrypt(encryptedFile);
+        FileMetadata source = getFileUseCase.execute(decryptedFile);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(source.getFileSize())
+                .header("Content-disposition", "attachment; filename=" + source.getFilename())
+                .body(new InputStreamResource(source.getStream()));
+    }
 }
 
