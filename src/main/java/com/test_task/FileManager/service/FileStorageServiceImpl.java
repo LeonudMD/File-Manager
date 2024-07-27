@@ -50,6 +50,12 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public FileMetadata addFile(MultipartFile file, Boolean oneTimeLink, long duration, TimeUnit timeUnit) {
         Path path = Path.of(file.getOriginalFilename());
+
+        Optional<FileMetadata> existingFile = fileMetadataRepository.findByFilename(file.getOriginalFilename());
+        if (existingFile.isPresent()) {
+            throw new IllegalStateException("Файл с таким именем уже существует: " + file.getOriginalFilename());
+        }
+
         try (InputStream inputStream = file.getInputStream()) {
 
             Date expirationTime = calculateExpirationTime(duration, timeUnit);
@@ -77,11 +83,15 @@ public class FileStorageServiceImpl implements FileStorageService {
                     .expirationTime(expirationTime)
                     .build();
 
-            return fileMetadataRepository.save(metadata);
+            fileMetadataRepository.save(metadata);
+
+            log.debug("Файл добавлен: " + file.getOriginalFilename() + ". Метаданные: " + metadata.toString());
+
+            return metadata;
 
         } catch (Exception ex) {
             LOGGER.severe("Error occurred: " + ex.getMessage());
-            log.debug("Возникла ошибка: " + ex.getMessage());
+            log.debug("Ошибка при добавлении файла: " + file.getOriginalFilename() + ". Ошибка: " + ex.getMessage());
             throw new IllegalStateException("Failed to add file: " + ex.getMessage(), ex);
         }
     }
@@ -128,8 +138,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 
             Optional<FileMetadata> metadata = fileMetadataRepository.findByFilename(filename);
             metadata.ifPresent(fileMetadataRepository::delete);
+
+            log.debug("Файл удален: " + filename);
+
         } catch (Exception ex) {
-            log.debug("Ошибка удаления файла: " + ex.getMessage());
+            log.debug("Ошибка при удалении файла: " + filename + ". Ошибка: " + ex.getMessage());
             LOGGER.severe("Failed to delete file: " + ex.getMessage());
             throw new IllegalStateException("Failed to delete file: " + ex.getMessage(), ex);
         }
@@ -157,13 +170,16 @@ public class FileStorageServiceImpl implements FileStorageService {
                 if (fileMetadata.getOneTimeLink()) {
                     deleteFile(fileMetadata.getFilename());
                 }
+
+                log.debug("Файл получен: " + filename + ". Метаданные: " + fileMetadata.toString());
+
                 return fileMetadata;
             } else {
-                log.debug("Метаданные файла не найдены");
+                log.debug("Метаданные файла не найдены: " + filename);
                 throw new IllegalStateException("File metadata not found");
             }
         } catch (Exception ex) {
-            log.debug("Не удалось получить файл: " + ex.getMessage());
+            log.debug("Ошибка при получении файла: " + filename + ". Ошибка: " + ex.getMessage());
             LOGGER.severe("Failed to get file: " + ex.getMessage());
             throw new IllegalStateException("Failed to get file: " + ex.getMessage(), ex);
         }
@@ -177,8 +193,12 @@ public class FileStorageServiceImpl implements FileStorageService {
      */
     @Override
     public FileMetadata getFileDetails(String filename) {
-        return fileMetadataRepository.findByFilename(filename)
+        FileMetadata metadata = fileMetadataRepository.findByFilename(filename)
                 .orElseThrow(() -> new IllegalStateException("File metadata not found"));
+
+        log.debug("Метаданные файла получены: " + filename + ". Метаданные: " + metadata.toString());
+
+        return metadata;
     }
 
     /**
@@ -190,6 +210,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         List<FileMetadata> expiredFiles = fileMetadataRepository.findAllByExpirationTimeBefore(now);
         for (FileMetadata file : expiredFiles) {
             deleteFile(file.getFilename());
+            log.debug("Удален просроченный файл: " + file.getFilename());
         }
     }
 }
