@@ -13,7 +13,7 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/akerumort/OrderManagementService.git
+   git clone https://github.com/LeonudMD/File-Manager.git
    
    cd OrderManagementService
 
@@ -28,9 +28,42 @@
 
 To run this project, you will need to add the following environment variables to your .env file
 
-`API_KEY`
+PostgreSQL settings
 
-`ANOTHER_API_KEY`
+`POSTGRES_USER`
+
+`POSTGRES_PASSWORD`
+
+`POSTGRES_DB`
+
+`POSTGRES_PORT`
+
+MinIO settings
+
+`MINIO_ACCESS_KEY`
+
+`MINIO_SECRET_KEY`
+
+`MINIO_CONSOLE_PORT`
+
+`MINIO_BUCKET_NAME`
+
+Timezone and language
+
+`TZ`
+
+`LANG`
+
+Docker image versions
+
+`POSTGRES_VERSION`
+
+`MINIO_VERSION`
+
+Encryption salt
+
+`SALT_SECRET_KEY`
+
 
 ## 🏃🏼‍♀️ Running the app
 
