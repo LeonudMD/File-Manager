@@ -1,4 +1,5 @@
 <h1 align="center">Welcome to File-Manager 👋</h1>
+<p align="center"><img src="https://socialify.git.ci/LeonudMD/File-Manager/image?language=1&name=1&owner=1&stargazers=1&theme=Dark"></p>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0-blue.svg?cacheSeconds=2592000" />
   <a href="http://localhost:8080/swagger-ui/index.html" target="_blank">
@@ -6,13 +7,54 @@
   </a>
 </p>
 
-> ESTful backend-приложения на Java для управления файлами: загрузка, скачивание, удаление, получение информации о файлах и создание одноразовых ссылок. Используются PostgreSQL для хранения метаданных и Minio для хранения файлов. Проект разворачивается с помощью Docker Compose.
+> RESTful backend applications in Java for file management: upload, download, delete, get file information and create one-time links. PostgreSQL is used for storing metadata and Minio for storing files. The project is deployed using Docker Compose.
 
-## Install
+## 🛠️ Installation
 
-```sh
-docker-compose up -d   
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/akerumort/OrderManagementService.git
+   
+   cd OrderManagementService
+
+2. Build the project:
+   ```bash
+   ./mvnw clean install
+
+4. Update the src/main/resources/application.properties file with your database credentials
+
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
+
+`API_KEY`
+
+`ANOTHER_API_KEY`
+
+## 🏃🏼‍♀️ Running the app
+
+1. Run the application using Maven:
+    ```bash
+   ./mvnw spring-boot:run
+    
+2. The application will start on http://localhost:8080
+
+## 🐋 Running with Docker Compose
+
+1. Ensure Docker and Docker Compose are installed.
+
+2. Build and start the containers:
+   ```bash
+   docker-compose up --build
+
+3. The application will start on http://localhost:8080
+
+## 📝 API Documentation
+
+- Available on:
+   ```bash
+   http://localhost:8080/swagger-ui/index.html
 
 ## Author
 
@@ -23,6 +65,3 @@ docker-compose up -d
 ## Show your support
 
 Give a ⭐️ if this project helped you!
-
-***
-_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
