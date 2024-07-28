@@ -38,6 +38,9 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Value("${minio.bucket.name}")
     private String bucketName;
 
+    @Value("${download.url.base}")
+    private String downloadUrlBase;
+
     /**
      * Добавляет файл в хранилище и сохраняет его метаданные.
      *
@@ -70,7 +73,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             );
 
             String encryptedLink = EncryptionUtil.encrypt(file.getOriginalFilename());
-            String downloadUrl = "http://localhost:8080/v1/files/download/" + encryptedLink;
+            String downloadUrl = downloadUrlBase + encryptedLink;
 
             FileMetadata metadata = FileMetadata.builder()
                     .filename(file.getOriginalFilename())
