@@ -54,6 +54,11 @@ public class EncryptionUtil {
 
         byte[] decodedBytes = Base64.decodeBase64(strToDecrypt);
         String decodedStr = new String(decodedBytes, StandardCharsets.UTF_8);
-        return decodedStr.replaceFirst(SALT, "");
+
+        if (!decodedStr.startsWith(SALT)) {
+            throw new IllegalArgumentException("Зашифрованная строка не содержит корректную соль.");
+        }
+
+        return decodedStr.substring(SALT.length());
     }
 }

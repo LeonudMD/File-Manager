@@ -16,6 +16,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 123
       SALT_SECRET_KEY: ${SALT_SECRET_KEY}
+      DOWNLOAD_URL_BASE: ${DOWNLOAD_URL_BASE}
     depends_on:
       - postgres
       - minio
