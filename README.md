@@ -44,7 +44,7 @@
    ```bash
    git clone https://github.com/LeonudMD/File-Manager.git
    
-   cd OrderManagementService
+   cd FileManager
 
 2. Build the project:
    ```bash
