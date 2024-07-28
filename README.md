@@ -9,6 +9,35 @@
 
 > RESTful backend applications in Java for file management: upload, download, delete, get file information and create one-time links. PostgreSQL is used for storing metadata and Minio for storing files. The project is deployed using Docker Compose.
 
+# ⚙ Features
+
+- CRUD operations for managing files
+- RESTful APIs
+- OpenAPI documentation
+- Database integration with PostgreSQL
+- Liquibase for database migrations
+- File storage with Minio
+
+## 💻 Used technologies
+
+- **Java 17**
+- **Spring Boot 3.3.1**
+- **Spring Data JPA**
+- **Spring Actuator**
+- **Spring HATEOAS**
+- **Spring Web**
+- **SpringDoc OpenAPI**
+- **Log4j 1.2.17**
+- **PostgreSQL**
+- **Liquibase**
+- **Lombok**
+- **MapStruct**
+- **Minio**
+- **Jackson Dataformat XML**
+- **WebJars Locator**
+- **Classgraph**
+- **Commons Codec**
+
 ## 🛠️ Installation
 
 1. Clone the repository:
